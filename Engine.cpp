@@ -2,9 +2,12 @@
 #include "Settings.h"
 #include "EngineBase.h"
 #include "Engine.h"
+#include "Cube.h"
 
 Engine::Engine()
 {
+    Cube* cube = new Cube();
+    AddGameObject(cube);
 }
 
 Engine::~Engine()

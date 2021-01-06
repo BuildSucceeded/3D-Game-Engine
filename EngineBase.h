@@ -29,11 +29,20 @@ public:
 
 	ID2D1Bitmap* LoadImage(LPCWSTR imageFile);
 
+	double GetZ0();
+
+	Point3D Translate(Point3D original, Point3D translation);
+	Point3D Rotate(Point3D original, Point3D translation);
+	Point3D ApplyPerspective(Point3D original);
+	Point3D CenterScreen(Point3D original);
+
 protected:
 
 	Point3D mousePosition;
 
 private:
+
+	double Z0;
 
 	ID2D1Factory* m_pDirect2dFactory;
 	ID2D1HwndRenderTarget* m_pRenderTarget;

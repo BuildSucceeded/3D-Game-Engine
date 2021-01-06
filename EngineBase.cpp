@@ -11,6 +11,8 @@
 EngineBase::EngineBase() : m_pDirect2dFactory(NULL), m_pRenderTarget(NULL)
 {
 	srand(time(NULL));
+
+	Z0 = (RESOLUTION_X / 2.0) / tan((FIELD_OF_VIEW / 2.0) * 3.14159265 / 180.0);
 }
 
 EngineBase::~EngineBase()
@@ -171,5 +173,53 @@ ID2D1Bitmap* EngineBase::LoadImage(LPCWSTR imageFile)
 	SafeRelease(&pSource);
 	SafeRelease(&pConverter);
 
+	return toReturn;
+}
+
+double EngineBase::GetZ0()
+{
+	return Z0;
+}
+
+Point3D EngineBase::Translate(Point3D original, Point3D translation)
+{
+	Point3D toReturn;
+	toReturn.x = original.x + translation.x;
+	toReturn.y = original.y + translation.y;
+	toReturn.z = original.z + translation.z;
+	return toReturn;
+}
+
+Point3D EngineBase::Rotate(Point3D original, Point3D rotation)
+{
+	Point3D toReturn;
+	// Rotation matrix: https://en.wikipedia.org/wiki/Rotation_matrix
+	toReturn.x = original.x * (cos(rotation.z) * cos(rotation.y)) + 
+				 original.y * (cos(rotation.z) * sin(rotation.y) * sin(rotation.x) - sin(rotation.z) * cos(rotation.x)) +
+				 original.z * (cos(rotation.z) * sin(rotation.y) * cos(rotation.x) + sin(rotation.z) * sin(rotation.x));
+	toReturn.y = original.x * (sin(rotation.z) * cos(rotation.y)) +
+				 original.y * (sin(rotation.z) * sin(rotation.y) * sin(rotation.x) + cos(rotation.z) * cos(rotation.x)) +
+				 original.z * (sin(rotation.z) * sin(rotation.y) * cos(rotation.x) - cos(rotation.z) * sin(rotation.x));
+	toReturn.z = original.x * (- sin(rotation.y)) +
+				 original.y * (cos(rotation.y) * sin(rotation.x)) +
+				 original.z * (cos(rotation.y) * cos(rotation.x));
+	return toReturn;
+}
+
+Point3D EngineBase::ApplyPerspective(Point3D original)
+{
+	Point3D toReturn;
+	toReturn.x = original.x * Z0 / (Z0 + original.z);
+	toReturn.y = original.y * Z0 / (Z0 + original.z);
+	toReturn.z = original.z;
+	return toReturn;
+}
+
+Point3D EngineBase::CenterScreen(Point3D original)
+{
+	Point3D toReturn;
+	toReturn.x = original.x + RESOLUTION_X / 2;
+	toReturn.y = original.y + RESOLUTION_Y / 2;
+	toReturn.z = original.z;
 	return toReturn;
 }

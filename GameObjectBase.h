@@ -19,6 +19,7 @@ public:
 	EngineBase* engine;
 	
 protected:
+
 	Point3D position;
 	Point3D speed;
 	Point3D rotation;
