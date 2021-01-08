@@ -14,6 +14,8 @@ public:
 
 	static bool SortOrder(Triangle* triangle1, Triangle* triangle2);
 
+	double GetNormalZ();
+
 private:
 	ID2D1SolidColorBrush* m_pColorBrush;
 
@@ -23,4 +25,5 @@ private:
 	Point3D worldPoints[3];
 	Point3D drawPoints[3];
 	double averageZ;
+	double normalZ;
 };

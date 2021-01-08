@@ -34,6 +34,9 @@ void Triangle::CalculateDrawPoints()
 	// Center screen
 	for (int i = 0; i < 3; i++)
 		drawPoints[i] = EngineBase::CenterScreen(drawPoints[i]);
+
+	// Normal Z -  is the triangle facing us or the other way
+	normalZ = (drawPoints[1].x - drawPoints[0].x) * (drawPoints[2].y - drawPoints[0].y) - (drawPoints[1].y - drawPoints[0].y) * (drawPoints[2].x - drawPoints[0].x);
 }
 
 void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
@@ -45,6 +48,10 @@ void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
 			&m_pColorBrush
 		);
 	}
+
+	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), m_pColorBrush);
+	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), m_pColorBrush);
+	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), m_pColorBrush);
 
 	ID2D1PathGeometry* clPath;
 	ID2D1Factory* factory;
@@ -68,4 +75,9 @@ void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
 bool Triangle::SortOrder(Triangle* triangle1, Triangle* triangle2)
 {
 	return triangle1->averageZ > triangle2->averageZ;
+}
+
+double Triangle::GetNormalZ()
+{
+	return normalZ;
 }

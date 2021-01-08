@@ -112,7 +112,8 @@ HRESULT EngineBase::Draw()
 	// Draw triangles in correct order
 	for (int i = 0; i < allTriangles.size(); i++) {
 		allTriangles[i]->CalculateDrawPoints();
-		allTriangles[i]->Draw(m_pRenderTarget);
+		if (allTriangles[i]->GetNormalZ() < 0)
+			allTriangles[i]->Draw(m_pRenderTarget);
 	}
 
     hr = m_pRenderTarget->EndDraw();
