@@ -8,9 +8,7 @@ Point3D GameObjectBase::GetPosition()
 	return this->position;
 }
 
-void GameObjectBase::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
+Point3D GameObjectBase::GetRotation()
 {
-	for (int i = 0; i < noTriangles; i++) {
-		triangles[i]->Draw(m_pRenderTarget, position, rotation);
-	}
+	return this->rotation;
 }

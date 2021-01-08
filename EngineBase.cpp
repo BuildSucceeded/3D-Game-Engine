@@ -1,3 +1,5 @@
+#include <vector>
+#include <algorithm>
 #include "framework.h"
 #include "Settings.h"
 #include "Point3D.h"
@@ -60,21 +62,16 @@ void EngineBase::MouseButtonDown(bool left, bool right)
 void EngineBase::AddGameObject(GameObjectBase* gameObj)
 {
 	gameObj->engine = this;
-    objectList[noObjects] = gameObj;
-	noObjects++;
+	objectList.push_back(gameObj);
 }
 
 void EngineBase::RemoveGameObject(GameObjectBase* gameObj)
 {
-	for (int i = 0; i < noObjects; i++)
+	for (int i = 0; i < objectList.size(); i++)
 	{
 		if (objectList[i] == gameObj)
 		{
-			noObjects--;
-			for (int j = i; j < noObjects; j++)
-			{
-				objectList[j] = objectList[j + 1];
-			}
+			objectList.erase(objectList.begin() + i);
 			return;
 		}
 	}
@@ -82,7 +79,7 @@ void EngineBase::RemoveGameObject(GameObjectBase* gameObj)
 
 void EngineBase::Logic(double elapsedTime)
 {
-    for (int i = 0; i < noObjects; i++)
+    for (int i = 0; i < objectList.size(); i++)
 	{
 		objectList[i]->Logic(elapsedTime);
 	}
@@ -100,12 +97,23 @@ HRESULT EngineBase::Draw()
 
     m_pRenderTarget->Clear(D2D1::ColorF(D2D_BACKGROUND_COLOR));
 
-    
+	// Get all triangles (translated into world based on object position)
+	std::vector<Triangle*> allTriangles;
+	for (int i = 0; i < objectList.size(); i++) {
+		for (int j = 0; j < objectList[i]->triangles.size(); j++) {
+			objectList[i]->triangles[j]->CalculateWorldPoints(objectList[i]->GetPosition(), objectList[i]->GetRotation());
+			allTriangles.push_back(objectList[i]->triangles[j]);
+		}
+	}
 
-    for (int i = 0; i < noObjects; i++)
-		objectList[i]->Draw(m_pRenderTarget);
+	// Sort the triangles by average Z
+	std::sort(allTriangles.begin(), allTriangles.end(), Triangle::SortOrder);
 
-
+	// Draw triangles in correct order
+	for (int i = 0; i < allTriangles.size(); i++) {
+		allTriangles[i]->CalculateDrawPoints();
+		allTriangles[i]->Draw(m_pRenderTarget);
+	}
 
     hr = m_pRenderTarget->EndDraw();
 

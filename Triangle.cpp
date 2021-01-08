@@ -11,7 +11,32 @@ Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, D2D1::ColorF::Enum c)
 	color = c;
 }
 
-void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget, Point3D position, Point3D rotation)
+void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
+{
+	// Rotate
+	for (int i = 0; i < 3; i++)
+		worldPoints[i] = EngineBase::Rotate(points[i], rotation);
+
+	// Translate
+	for (int i = 0; i < 3; i++)
+		worldPoints[i] = EngineBase::Translate(worldPoints[i], position);
+
+	// Average Z (for sorting triangles)
+	averageZ = (worldPoints[0].z + worldPoints[1].z + worldPoints[2].z) / 3.0;
+}
+
+void Triangle::CalculateDrawPoints()
+{
+	// Apply perspective
+	for (int i = 0; i < 3; i++)
+		drawPoints[i] = EngineBase::ApplyPerspective(worldPoints[i]);
+
+	// Center screen
+	for (int i = 0; i < 3; i++)
+		drawPoints[i] = EngineBase::CenterScreen(drawPoints[i]);
+}
+
+void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
 {
 	if (m_pColorBrush == NULL)
 	{
@@ -20,24 +45,6 @@ void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget, Point3D position, Po
 			&m_pColorBrush
 		);
 	}
-
-	Point3D drawPoints[3];
-
-	// Rotate
-	for (int i = 0; i < 3; i++)
-		drawPoints[i] = EngineBase::Rotate(points[i], rotation);
-
-	// Translate
-	for (int i = 0; i < 3; i++)
-		drawPoints[i] = EngineBase::Translate(drawPoints[i], position);
-
-	// Apply perspective
-	for (int i = 0; i < 3; i++)
-		drawPoints[i] = EngineBase::ApplyPerspective(drawPoints[i]);
-
-	// Center screen
-	for (int i = 0; i < 3; i++)
-		drawPoints[i] = EngineBase::CenterScreen(drawPoints[i]);
 
 	ID2D1PathGeometry* clPath;
 	ID2D1Factory* factory;
@@ -56,4 +63,9 @@ void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget, Point3D position, Po
 
 	SafeRelease(&pclSink);
 	SafeRelease(&clPath);
+}
+
+bool Triangle::SortOrder(Triangle* triangle1, Triangle* triangle2)
+{
+	return triangle1->averageZ > triangle2->averageZ;
 }
