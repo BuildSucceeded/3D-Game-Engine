@@ -157,6 +157,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineBase.cpp" />
     <ClCompile Include="GameObjectBase.cpp" />
+    <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game.rc" />

@@ -31,10 +31,10 @@ public:
 
 	double GetZ0();
 
-	Point3D Translate(Point3D original, Point3D translation);
-	Point3D Rotate(Point3D original, Point3D translation);
-	Point3D ApplyPerspective(Point3D original);
-	Point3D CenterScreen(Point3D original);
+	static Point3D Translate(Point3D original, Point3D translation);
+	static Point3D Rotate(Point3D original, Point3D translation);
+	static Point3D ApplyPerspective(Point3D original);
+	static Point3D CenterScreen(Point3D original);
 
 protected:
 
@@ -42,7 +42,7 @@ protected:
 
 private:
 
-	double Z0;
+	static double Z0;
 
 	ID2D1Factory* m_pDirect2dFactory;
 	ID2D1HwndRenderTarget* m_pRenderTarget;

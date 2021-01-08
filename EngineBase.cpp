@@ -8,11 +8,11 @@
 #pragma comment(lib, "dwrite")
 #pragma comment(lib, "Windowscodecs.lib")
 
+double EngineBase::Z0 = (RESOLUTION_X / 2.0) / tan((FIELD_OF_VIEW / 2.0) * 3.14159265 / 180.0);
+
 EngineBase::EngineBase() : m_pDirect2dFactory(NULL), m_pRenderTarget(NULL)
 {
 	srand(time(NULL));
-
-	Z0 = (RESOLUTION_X / 2.0) / tan((FIELD_OF_VIEW / 2.0) * 3.14159265 / 180.0);
 }
 
 EngineBase::~EngineBase()
@@ -178,7 +178,7 @@ ID2D1Bitmap* EngineBase::LoadImage(LPCWSTR imageFile)
 
 double EngineBase::GetZ0()
 {
-	return Z0;
+	return EngineBase::Z0;
 }
 
 Point3D EngineBase::Translate(Point3D original, Point3D translation)

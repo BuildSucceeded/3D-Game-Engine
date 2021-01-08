@@ -8,62 +8,37 @@ Cube::Cube()
 	position = Point3D::Create(0, 0, 400);
 	rotation = Point3D::Create(0, 0, 0);
 
-	points[0] = Point3D::Create(-200, -200, -200);
-	points[1] = Point3D::Create(-200, 200, -200);
-	points[2] = Point3D::Create(200, 200, -200);
-	points[3] = Point3D::Create(200, -200, -200);
-	points[4] = Point3D::Create(-200, -200, 200);
-	points[5] = Point3D::Create(-200, 200, 200);
-	points[6] = Point3D::Create(200, 200, 200);
-	points[7] = Point3D::Create(200, -200, 200);
+	Point3D point0 = Point3D::Create(-200, -200, -200);
+	Point3D point1 = Point3D::Create(-200, 200, -200);
+	Point3D point2 = Point3D::Create(200, 200, -200);
+	Point3D point3 = Point3D::Create(200, -200, -200);
+	Point3D point4 = Point3D::Create(-200, -200, 200);
+	Point3D point5 = Point3D::Create(-200, 200, 200);
+	Point3D point6 = Point3D::Create(200, 200, 200);
+	Point3D point7 = Point3D::Create(200, -200, 200);
+
+	noTriangles = 12;
+	// front
+	triangles[0] = new Triangle(point0, point1, point3, D2D1::ColorF::Red);
+	triangles[1] = new Triangle(point1, point2, point3, D2D1::ColorF::Red);
+	// back
+	triangles[2] = new Triangle(point7, point5, point4, D2D1::ColorF::Red);
+	triangles[3] = new Triangle(point7, point6, point5, D2D1::ColorF::Red);
+	// left
+	triangles[4] = new Triangle(point4, point0, point7, D2D1::ColorF::Green);
+	triangles[5] = new Triangle(point0, point3, point7, D2D1::ColorF::Green);
+	// right
+	triangles[6] = new Triangle(point1, point6, point2, D2D1::ColorF::Green);
+	triangles[7] = new Triangle(point1, point5, point6, D2D1::ColorF::Green);
+	// top
+	triangles[8] = new Triangle(point4, point1, point0, D2D1::ColorF::Blue);
+	triangles[9] = new Triangle(point4, point5, point1, D2D1::ColorF::Blue);
+	// bottom
+	triangles[10] = new Triangle(point3, point2, point7, D2D1::ColorF::Blue);
+	triangles[11] = new Triangle(point7, point2, point6, D2D1::ColorF::Blue);
 }
 
 void Cube::Logic(double elapsedTime)
 {
 	rotation.y += 1 * elapsedTime;
-}
-
-void Cube::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
-{
-	if (m_pWhiteBrush == NULL)
-	{
-		m_pRenderTarget->CreateSolidColorBrush(
-			D2D1::ColorF(D2D1::ColorF::White),
-			&m_pWhiteBrush
-		);
-	}
-
-	Point3D drawPoints[8];
-	
-	// Rotate
-	for (int i = 0; i < 8; i++)
-		drawPoints[i] = engine->Rotate(points[i], rotation);
-
-	// Translate
-	for (int i = 0; i < 8; i++)
-		drawPoints[i] = engine->Translate(drawPoints[i], position);
-
-	// Apply perspective
-	for (int i = 0; i < 8; i++)
-		drawPoints[i] = engine->ApplyPerspective(drawPoints[i]);
-
-	// Center screen
-	for (int i = 0; i < 8; i++)
-		drawPoints[i] = engine->CenterScreen(drawPoints[i]);
-
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), D2D1::Point2F(drawPoints[3].x, drawPoints[3].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[3].x, drawPoints[3].y), D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), m_pWhiteBrush, 4);
-
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[4].x, drawPoints[4].y), D2D1::Point2F(drawPoints[5].x, drawPoints[5].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[5].x, drawPoints[5].y), D2D1::Point2F(drawPoints[6].x, drawPoints[6].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[6].x, drawPoints[6].y), D2D1::Point2F(drawPoints[7].x, drawPoints[7].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[7].x, drawPoints[7].y), D2D1::Point2F(drawPoints[4].x, drawPoints[4].y), m_pWhiteBrush, 4);
-
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), D2D1::Point2F(drawPoints[4].x, drawPoints[4].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), D2D1::Point2F(drawPoints[5].x, drawPoints[5].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), D2D1::Point2F(drawPoints[6].x, drawPoints[6].y), m_pWhiteBrush, 4);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[3].x, drawPoints[3].y), D2D1::Point2F(drawPoints[7].x, drawPoints[7].y), m_pWhiteBrush, 4);
-
 }
