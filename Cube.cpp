@@ -35,9 +35,10 @@ Cube::Cube()
 	// bottom
 	triangles.push_back(new Triangle(point3, point2, point7, D2D1::ColorF::Magenta));
 	triangles.push_back(new Triangle(point7, point2, point6, D2D1::ColorF::Magenta));
+	
 }
 
 void Cube::Logic(double elapsedTime)
 {
-	rotation.y += 1 * elapsedTime;
+	rotation.y += 0.5 * elapsedTime;
 }

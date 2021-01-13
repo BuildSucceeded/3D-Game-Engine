@@ -10,14 +10,13 @@ public:
 
 	void CalculateWorldPoints(Point3D position, Point3D rotation);
 	void CalculateDrawPoints();
-	void Draw(ID2D1HwndRenderTarget* m_pRenderTarget);
+	void Draw(int *renderBuffer);
 
 	static bool SortOrder(Triangle* triangle1, Triangle* triangle2);
 
 	double GetNormalZ();
 
 private:
-	ID2D1SolidColorBrush* m_pColorBrush;
 
 	D2D1::ColorF::Enum color;
 

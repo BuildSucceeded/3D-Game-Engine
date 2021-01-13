@@ -34,6 +34,8 @@ HRESULT EngineBase::InitializeD2D(HWND m_hwnd)
         &m_pRenderTarget
     );
 
+	m_pRenderTarget->CreateBitmap(D2D1::SizeU(RESOLUTION_X, RESOLUTION_Y), D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE)), &pBitmap);
+
     return S_OK;
 }
 
@@ -94,8 +96,8 @@ HRESULT EngineBase::Draw()
 
     m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
-
-    m_pRenderTarget->Clear(D2D1::ColorF(D2D_BACKGROUND_COLOR));
+	// Clear buffer vector
+	memset(renderBuffer, 0, RESOLUTION_X * RESOLUTION_Y * 4);
 
 	// Get all triangles (translated into world based on object position)
 	std::vector<Triangle*> allTriangles;
@@ -113,8 +115,12 @@ HRESULT EngineBase::Draw()
 	for (int i = 0; i < allTriangles.size(); i++) {
 		allTriangles[i]->CalculateDrawPoints();
 		if (allTriangles[i]->GetNormalZ() < 0)
-			allTriangles[i]->Draw(m_pRenderTarget);
+			allTriangles[i]->Draw(renderBuffer);
 	}
+
+	pBitmap->CopyFromMemory(nullptr, renderBuffer, RESOLUTION_X * 4);
+
+	m_pRenderTarget->DrawBitmap(pBitmap, D2D1::RectF(0, 0, RESOLUTION_X, RESOLUTION_Y));
 
     hr = m_pRenderTarget->EndDraw();
 

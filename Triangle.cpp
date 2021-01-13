@@ -39,37 +39,63 @@ void Triangle::CalculateDrawPoints()
 	normalZ = (drawPoints[1].x - drawPoints[0].x) * (drawPoints[2].y - drawPoints[0].y) - (drawPoints[1].y - drawPoints[0].y) * (drawPoints[2].x - drawPoints[0].x);
 }
 
-void Triangle::Draw(ID2D1HwndRenderTarget* m_pRenderTarget)
+void Triangle::Draw(int* renderBuffer)
 {
-	if (m_pColorBrush == NULL)
-	{
-		m_pRenderTarget->CreateSolidColorBrush(
-			D2D1::ColorF(color),
-			&m_pColorBrush
-		);
+	
+	Point3D aux;
+	if (drawPoints[0].y > drawPoints[1].y) {
+		aux = drawPoints[0];
+		drawPoints[0] = drawPoints[1];
+		drawPoints[1] = aux;
+	}
+	if (drawPoints[0].y > drawPoints[2].y) {
+		aux = drawPoints[0];
+		drawPoints[0] = drawPoints[2];
+		drawPoints[2] = aux;
+	}
+	if (drawPoints[1].y > drawPoints[2].y) {
+		aux = drawPoints[1];
+		drawPoints[1] = drawPoints[2];
+		drawPoints[2] = aux;
 	}
 
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), m_pColorBrush);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[1].x, drawPoints[1].y), D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), m_pColorBrush);
-	m_pRenderTarget->DrawLine(D2D1::Point2F(drawPoints[2].x, drawPoints[2].y), D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), m_pColorBrush);
+	if (drawPoints[0].y < drawPoints[1].y) {
+		double slope1 = (drawPoints[1].x - drawPoints[0].x) / (drawPoints[1].y - drawPoints[0].y);
+		double slope2 = (drawPoints[2].x - drawPoints[0].x) / (drawPoints[2].y - drawPoints[0].y);
+		for (int i = 0; i <= drawPoints[1].y - drawPoints[0].y; i++) {
+			int x1 = drawPoints[0].x + i * slope1;
+			int x2 = drawPoints[0].x + i * slope2;
+			int y = drawPoints[0].y + i;
 
-	ID2D1PathGeometry* clPath;
-	ID2D1Factory* factory;
-	m_pRenderTarget->GetFactory(&factory);
-	factory->CreatePathGeometry(&clPath);
+			if (x1 > x2) {
+				int aux = x1;
+				x1 = x2;
+				x2 = aux;
+			}
+			for (int j = x1; j <= x2; j++) {
+				renderBuffer[RESOLUTION_X * y + j] = color;
+			}
+		}
+	}
+	if (drawPoints[1].y < drawPoints[2].y) {
+		double slope1 = (drawPoints[2].x - drawPoints[1].x) / (drawPoints[2].y - drawPoints[1].y);
+		double slope2 = (drawPoints[2].x - drawPoints[0].x) / (drawPoints[2].y - drawPoints[0].y);
+		double sx = drawPoints[2].x - (drawPoints[2].y - drawPoints[1].y) * slope2;
+		for (int i = 0; i <= drawPoints[2].y - drawPoints[1].y; i++) {
+			double x1 = drawPoints[1].x + i * slope1;
+			double x2 = sx + i * slope2;
+			int y = drawPoints[1].y + i;
 
-	ID2D1GeometrySink* pclSink;
-	clPath->Open(&pclSink);
-	pclSink->SetFillMode(D2D1_FILL_MODE_WINDING);
-	pclSink->BeginFigure(D2D1::Point2F(drawPoints[0].x, drawPoints[0].y), D2D1_FIGURE_BEGIN_FILLED);
-	pclSink->AddLine(D2D1::Point2F(drawPoints[1].x, drawPoints[1].y));
-	pclSink->AddLine(D2D1::Point2F(drawPoints[2].x, drawPoints[2].y));
-	pclSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-	pclSink->Close();
-	m_pRenderTarget->FillGeometry(clPath, m_pColorBrush);
-
-	SafeRelease(&pclSink);
-	SafeRelease(&clPath);
+			if (x1 > x2) {
+				int aux = x1;
+				x1 = x2;
+				x2 = aux;
+			}
+			for (int j = x1; j <= x2; j++) {
+				renderBuffer[RESOLUTION_X * y + j] = color;
+			}
+		}
+	}
 }
 
 bool Triangle::SortOrder(Triangle* triangle1, Triangle* triangle2)

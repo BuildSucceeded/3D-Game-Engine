@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "resource.h"
+#include "Settings.h"
 #include "Point3D.h"
 #include "EngineBase.h"
 #include "GameObjectBase.h"
@@ -49,5 +50,8 @@ private:
 	ID2D1HwndRenderTarget* m_pRenderTarget;
 
 	std::vector<GameObjectBase*> objectList;
+
+	ID2D1Bitmap* pBitmap;
+	int renderBuffer[RESOLUTION_X * RESOLUTION_Y];
 };
 
