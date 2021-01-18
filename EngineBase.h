@@ -30,6 +30,7 @@ public:
 	HRESULT Draw();
 
 	ID2D1Bitmap* LoadImage(LPCWSTR imageFile);
+	IWICBitmap* LoadImageInWIC(LPCWSTR imageFile);
 
 	double GetZ0();
 
@@ -52,6 +53,8 @@ private:
 	std::vector<GameObjectBase*> objectList;
 
 	ID2D1Bitmap* pBitmap;
+	
+
 	int renderBuffer[RESOLUTION_X * RESOLUTION_Y];
 };
 

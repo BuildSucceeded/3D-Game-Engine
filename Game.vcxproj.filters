@@ -48,6 +48,9 @@
     <ClInclude Include="Triangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game.rc">
@@ -59,6 +62,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Game.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="crate.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="crate.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -79,6 +88,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Triangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

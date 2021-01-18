@@ -157,6 +157,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <ItemGroup>
@@ -165,12 +166,15 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineBase.cpp" />
     <ClCompile Include="GameObjectBase.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="crate.jpg" />
+    <Image Include="crate.png" />
     <Image Include="Game.ico" />
     <Image Include="small.ico" />
   </ItemGroup>

@@ -3,12 +3,12 @@
 #include "Triangle.h"
 #include "EngineBase.h"
 
-Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, D2D1::ColorF::Enum c)
+Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, Texture* t)
 {
 	points[0] = p0;
 	points[1] = p1;
 	points[2] = p2;
-	color = c;
+	texture = t;
 }
 
 void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
@@ -59,43 +59,95 @@ void Triangle::Draw(int* renderBuffer)
 		drawPoints[2] = aux;
 	}
 
-	if (drawPoints[0].y < drawPoints[1].y) {
-		double slope1 = (drawPoints[1].x - drawPoints[0].x) / (drawPoints[1].y - drawPoints[0].y);
-		double slope2 = (drawPoints[2].x - drawPoints[0].x) / (drawPoints[2].y - drawPoints[0].y);
-		for (int i = 0; i <= drawPoints[1].y - drawPoints[0].y; i++) {
-			int x1 = drawPoints[0].x + i * slope1;
-			int x2 = drawPoints[0].x + i * slope2;
-			int y = drawPoints[0].y + i;
+	int p0x = drawPoints[0].x;
+	int p0y = drawPoints[0].y;
+	int p1x = drawPoints[1].x;
+	int p1y = drawPoints[1].y;
+	int p2x = drawPoints[2].x;
+	int p2y = drawPoints[2].y;
+
+	int texWidth = texture->GetWidth();
+	int texHeight = texture->GetHeight();
+
+	if (p0y < p1y) {
+		double slope1 = ((double)p1x - p0x) / (p1y - p0y);
+		double slope2 = ((double)p2x - p0x) / (p2y - p0y);
+		for (int i = 0; i <= p1y - p0y; i++) {
+			int x1 = p0x + i * slope1;
+			int x2 = p0x + i * slope2;
+			int y = p0y + i;
+
+			double us = drawPoints[0].u + ((double)y - p0y) / (p1y - p0y) * (drawPoints[1].u - drawPoints[0].u);
+			double vs = drawPoints[0].v + ((double)y - p0y) / (p1y - p0y) * (drawPoints[1].v - drawPoints[0].v);
+
+			double ue = drawPoints[0].u + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].u - drawPoints[0].u);
+			double ve = drawPoints[0].v + (double)(y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
 
 			if (x1 > x2) {
 				int aux = x1;
 				x1 = x2;
 				x2 = aux;
+				double aux2 = us;
+				us = ue;
+				ue = aux2;
+				aux2 = vs;
+				vs = ve;
+				ve = aux2;
 			}
-			for (int j = x1; j <= x2; j++) {
-				renderBuffer[RESOLUTION_X * y + j] = color;
+			if (x2 > x1) {
+				double u = us * texWidth;
+				double ustep = (ue - us) / (x2 - x1) * texWidth;
+				double v = vs * texHeight;
+				double vstep = (ve - vs) / (x2 - x1) * texHeight;
+				for (int j = 0; j <= x2 - x1; j++) {
+					int x = x1 + j;
+					u += ustep;
+					v += vstep;
+					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u, v);
+				}
 			}
 		}
 	}
-	if (drawPoints[1].y < drawPoints[2].y) {
-		double slope1 = (drawPoints[2].x - drawPoints[1].x) / (drawPoints[2].y - drawPoints[1].y);
-		double slope2 = (drawPoints[2].x - drawPoints[0].x) / (drawPoints[2].y - drawPoints[0].y);
-		double sx = drawPoints[2].x - (drawPoints[2].y - drawPoints[1].y) * slope2;
-		for (int i = 0; i <= drawPoints[2].y - drawPoints[1].y; i++) {
-			double x1 = drawPoints[1].x + i * slope1;
-			double x2 = sx + i * slope2;
-			int y = drawPoints[1].y + i;
+	if (p1y < p2y) {
+		double slope1 = ((double)p2x - p1x) / (p2y - p1y);
+		double slope2 = ((double)p2x - p0x) / (p2y - p0y);
+		double sx = p2x - (p2y - p1y) * slope2;
+		for (int i = 0; i <= p2y - p1y; i++) {
+			int x1 = p1x + i * slope1;
+			int x2 = sx + i * slope2;
+			int y = p1y + i;
+
+			double us = drawPoints[1].u + ((double)y - p1y) / (p2y - p1y) * (drawPoints[2].u - drawPoints[1].u);
+			double vs = drawPoints[1].v + ((double)y - p1y) / (p2y - p1y) * (drawPoints[2].v - drawPoints[1].v);
+
+			double ue = drawPoints[0].u + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].u - drawPoints[0].u);
+			double ve = drawPoints[0].v + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
 
 			if (x1 > x2) {
 				int aux = x1;
 				x1 = x2;
 				x2 = aux;
+				double aux2 = us;
+				us = ue;
+				ue = aux2;
+				aux2 = vs;
+				vs = ve;
+				ve = aux2;
 			}
-			for (int j = x1; j <= x2; j++) {
-				renderBuffer[RESOLUTION_X * y + j] = color;
+			if (x2 > x1) {
+				double u = us * texWidth;
+				double ustep = (ue - us) / (x2 - x1) * texWidth;
+				double v = vs * texHeight;
+				double vstep = (ve - vs) / (x2 - x1) * texHeight;
+				for (int x = x1; x <= x2; x++) {
+					u += ustep;
+					v += vstep;
+					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u, v);
+				}
 			}
 		}
 	}
+
 }
 
 bool Triangle::SortOrder(Triangle* triangle1, Triangle* triangle2)

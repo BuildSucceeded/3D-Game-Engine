@@ -191,6 +191,56 @@ ID2D1Bitmap* EngineBase::LoadImage(LPCWSTR imageFile)
 	return toReturn;
 }
 
+
+
+IWICBitmap* EngineBase::LoadImageInWIC(LPCWSTR imageFile)
+{
+	IWICBitmapDecoder* pDecoder = NULL;
+	IWICBitmapFrameDecode* pSource = NULL;
+	IWICFormatConverter* pConverter = NULL;
+	IWICImagingFactory* pIWICFactory = NULL;
+	UINT originalWidth = 0;
+	UINT originalHeight = 0;
+
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, reinterpret_cast<void**>(&pIWICFactory));
+
+	HRESULT hr = pIWICFactory->CreateDecoderFromFilename(
+		imageFile,
+		NULL,
+		GENERIC_READ,
+		WICDecodeMetadataCacheOnLoad,
+		&pDecoder
+	);
+
+	if (SUCCEEDED(hr))
+	{
+		// Create the initial frame.
+		hr = pDecoder->GetFrame(0, &pSource);
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		hr = pSource->GetSize(&originalWidth, &originalHeight);
+	}
+
+	IWICBitmap* toReturn = NULL;
+
+	if (SUCCEEDED(hr))
+	{
+
+		hr = pIWICFactory->CreateBitmapFromSourceRect(
+			pSource, 0, 0, (UINT)originalWidth, (UINT)originalHeight, &toReturn);
+	}
+
+	SafeRelease(&pIWICFactory);
+	SafeRelease(&pDecoder);
+	SafeRelease(&pSource);
+	SafeRelease(&pConverter);
+
+	return toReturn;
+}
+
 double EngineBase::GetZ0()
 {
 	return EngineBase::Z0;
@@ -202,6 +252,8 @@ Point3D EngineBase::Translate(Point3D original, Point3D translation)
 	toReturn.x = original.x + translation.x;
 	toReturn.y = original.y + translation.y;
 	toReturn.z = original.z + translation.z;
+	toReturn.u = original.u;
+	toReturn.v = original.v;
 	return toReturn;
 }
 
@@ -218,6 +270,8 @@ Point3D EngineBase::Rotate(Point3D original, Point3D rotation)
 	toReturn.z = original.x * (- sin(rotation.y)) +
 				 original.y * (cos(rotation.y) * sin(rotation.x)) +
 				 original.z * (cos(rotation.y) * cos(rotation.x));
+	toReturn.u = original.u;
+	toReturn.v = original.v;
 	return toReturn;
 }
 
@@ -227,6 +281,8 @@ Point3D EngineBase::ApplyPerspective(Point3D original)
 	toReturn.x = original.x * Z0 / (Z0 + original.z);
 	toReturn.y = original.y * Z0 / (Z0 + original.z);
 	toReturn.z = original.z;
+	toReturn.u = original.u;
+	toReturn.v = original.v;
 	return toReturn;
 }
 
@@ -236,5 +292,7 @@ Point3D EngineBase::CenterScreen(Point3D original)
 	toReturn.x = original.x + RESOLUTION_X / 2;
 	toReturn.y = original.y + RESOLUTION_Y / 2;
 	toReturn.z = original.z;
+	toReturn.u = original.u;
+	toReturn.v = original.v;
 	return toReturn;
 }
