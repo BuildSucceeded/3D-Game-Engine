@@ -64,9 +64,6 @@
     <Image Include="Game.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="crate.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="crate.png">
       <Filter>Resource Files</Filter>
     </Image>

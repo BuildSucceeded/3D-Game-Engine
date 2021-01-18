@@ -79,9 +79,11 @@ void Triangle::Draw(int* renderBuffer)
 
 			double us = drawPoints[0].u + ((double)y - p0y) / (p1y - p0y) * (drawPoints[1].u - drawPoints[0].u);
 			double vs = drawPoints[0].v + ((double)y - p0y) / (p1y - p0y) * (drawPoints[1].v - drawPoints[0].v);
+			double ws = drawPoints[0].w + ((double)y - p0y) / (p1y - p0y) * (drawPoints[1].w - drawPoints[0].w);
 
 			double ue = drawPoints[0].u + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].u - drawPoints[0].u);
-			double ve = drawPoints[0].v + (double)(y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
+			double ve = drawPoints[0].v + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
+			double we = drawPoints[0].w + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].w - drawPoints[0].w);
 
 			if (x1 > x2) {
 				int aux = x1;
@@ -93,17 +95,23 @@ void Triangle::Draw(int* renderBuffer)
 				aux2 = vs;
 				vs = ve;
 				ve = aux2;
+				aux2 = ws;
+				ws = we;
+				we = aux2;
 			}
 			if (x2 > x1) {
 				double u = us * texWidth;
 				double ustep = (ue - us) / (x2 - x1) * texWidth;
 				double v = vs * texHeight;
 				double vstep = (ve - vs) / (x2 - x1) * texHeight;
+				double w = ws;
+				double wstep = (we - ws) / (x2 - x1);
 				for (int j = 0; j <= x2 - x1; j++) {
 					int x = x1 + j;
 					u += ustep;
 					v += vstep;
-					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u, v);
+					w += wstep;
+					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
 				}
 			}
 		}
@@ -119,9 +127,11 @@ void Triangle::Draw(int* renderBuffer)
 
 			double us = drawPoints[1].u + ((double)y - p1y) / (p2y - p1y) * (drawPoints[2].u - drawPoints[1].u);
 			double vs = drawPoints[1].v + ((double)y - p1y) / (p2y - p1y) * (drawPoints[2].v - drawPoints[1].v);
+			double ws = drawPoints[1].w + ((double)y - p1y) / (p2y - p1y) * (drawPoints[2].w - drawPoints[1].w);
 
 			double ue = drawPoints[0].u + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].u - drawPoints[0].u);
 			double ve = drawPoints[0].v + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
+			double we = drawPoints[0].w + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].w - drawPoints[0].w);
 
 			if (x1 > x2) {
 				int aux = x1;
@@ -133,16 +143,22 @@ void Triangle::Draw(int* renderBuffer)
 				aux2 = vs;
 				vs = ve;
 				ve = aux2;
+				aux2 = ws;
+				ws = we;
+				we = aux2;
 			}
 			if (x2 > x1) {
 				double u = us * texWidth;
 				double ustep = (ue - us) / (x2 - x1) * texWidth;
 				double v = vs * texHeight;
 				double vstep = (ve - vs) / (x2 - x1) * texHeight;
+				double w = ws;
+				double wstep = (we - ws) / (x2 - x1);
 				for (int x = x1; x <= x2; x++) {
 					u += ustep;
 					v += vstep;
-					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u, v);
+					w += wstep;
+					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
 				}
 			}
 		}

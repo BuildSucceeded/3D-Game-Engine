@@ -8,6 +8,7 @@ struct Point3D
 
 	double u;
 	double v;
+	double w = 1;
 
 	static Point3D Create(double x, double y, double z)
 	{

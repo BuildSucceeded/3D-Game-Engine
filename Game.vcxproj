@@ -173,7 +173,6 @@
     <ResourceCompile Include="Game.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="crate.jpg" />
     <Image Include="crate.png" />
     <Image Include="Game.ico" />
     <Image Include="small.ico" />

@@ -191,8 +191,6 @@ ID2D1Bitmap* EngineBase::LoadImage(LPCWSTR imageFile)
 	return toReturn;
 }
 
-
-
 IWICBitmap* EngineBase::LoadImageInWIC(LPCWSTR imageFile)
 {
 	IWICBitmapDecoder* pDecoder = NULL;
@@ -254,6 +252,7 @@ Point3D EngineBase::Translate(Point3D original, Point3D translation)
 	toReturn.z = original.z + translation.z;
 	toReturn.u = original.u;
 	toReturn.v = original.v;
+	toReturn.w = original.w;
 	return toReturn;
 }
 
@@ -272,6 +271,7 @@ Point3D EngineBase::Rotate(Point3D original, Point3D rotation)
 				 original.z * (cos(rotation.y) * cos(rotation.x));
 	toReturn.u = original.u;
 	toReturn.v = original.v;
+	toReturn.w = original.w;
 	return toReturn;
 }
 
@@ -281,8 +281,11 @@ Point3D EngineBase::ApplyPerspective(Point3D original)
 	toReturn.x = original.x * Z0 / (Z0 + original.z);
 	toReturn.y = original.y * Z0 / (Z0 + original.z);
 	toReturn.z = original.z;
-	toReturn.u = original.u;
-	toReturn.v = original.v;
+
+	toReturn.u = original.u * Z0 / (Z0 + original.z);
+	toReturn.v = original.v * Z0 / (Z0 + original.z);
+	toReturn.w = original.w * Z0 / (Z0 + original.z);
+
 	return toReturn;
 }
 
@@ -294,5 +297,6 @@ Point3D EngineBase::CenterScreen(Point3D original)
 	toReturn.z = original.z;
 	toReturn.u = original.u;
 	toReturn.v = original.v;
+	toReturn.w = original.w;
 	return toReturn;
 }

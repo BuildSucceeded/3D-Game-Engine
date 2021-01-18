@@ -28,10 +28,8 @@ UINT Texture::GetHeight()
 
 int Texture::GetValue(int x, int y)
 {
-	//x = abs(x);
 	if (x >= textureWidth)
 		x = textureWidth - 1;
-	//y = abs(y);
 	if (y >= textureHeight)
 		y = textureHeight - 1;
 	return textureMem[y * textureWidth + x];
