@@ -43,5 +43,5 @@ Cube::Cube()
 
 void Cube::Logic(double elapsedTime)
 {
-	rotation.y += 1 * elapsedTime;
+	//rotation.y += 1 * elapsedTime;
 }

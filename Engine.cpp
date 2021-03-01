@@ -14,6 +14,22 @@ Engine::~Engine()
 {
 }
 
+void Engine::KeyDown(WPARAM wParam)
+{
+    EngineBase::KeyDown(wParam);
+
+    // Add keys handling below
+
+}
+
+void Engine::KeyUp(WPARAM wParam)
+{
+    EngineBase::KeyUp(wParam);
+
+    // Add keys handling below
+
+}
+
 void Engine::Logic(double elapsedTime)
 {
     EngineBase::Logic(elapsedTime);

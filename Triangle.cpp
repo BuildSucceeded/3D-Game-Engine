@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include "Point3D.h"
 #include "Triangle.h"
+#include "Camera.h"
 #include "EngineBase.h"
 
 Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, Texture* t)
@@ -20,16 +21,31 @@ void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
 	// Translate
 	for (int i = 0; i < 3; i++)
 		worldPoints[i] = EngineBase::Translate(worldPoints[i], position);
+}
+
+void Triangle::CalculateCameraView(Camera* camera)
+{
+	// Translate
+	Point3D cameraPos = camera->GetPosition();
+	Point3D translateBy = Point3D::Create(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+	for (int i = 0; i < 3; i++)
+		cameraPoints[i] = EngineBase::Translate(worldPoints[i], translateBy);
+
+	// Rotate
+	Point3D cameraRot = camera->GetRotation();
+	Point3D rotateBy = Point3D::Create(-cameraRot.x, -cameraRot.y, -cameraRot.z);
+	for (int i = 0; i < 3; i++)
+		cameraPoints[i] = EngineBase::Rotate(cameraPoints[i], rotateBy);
 
 	// Average Z (for sorting triangles)
-	averageZ = (worldPoints[0].z + worldPoints[1].z + worldPoints[2].z) / 3.0;
+	averageZ = (cameraPoints[0].z + cameraPoints[1].z + cameraPoints[2].z) / 3.0;
 }
 
 void Triangle::CalculateDrawPoints()
 {
 	// Apply perspective
 	for (int i = 0; i < 3; i++)
-		drawPoints[i] = EngineBase::ApplyPerspective(worldPoints[i]);
+		drawPoints[i] = EngineBase::ApplyPerspective(cameraPoints[i]);
 
 	// Center screen
 	for (int i = 0; i < 3; i++)
@@ -106,12 +122,13 @@ void Triangle::Draw(int* renderBuffer)
 				double vstep = (ve - vs) / (x2 - x1) * texHeight;
 				double w = ws;
 				double wstep = (we - ws) / (x2 - x1);
-				for (int j = 0; j <= x2 - x1; j++) {
-					int x = x1 + j;
+				for (int x = x1; x <= x2; x++) {
 					u += ustep;
 					v += vstep;
 					w += wstep;
-					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
+					if (x >= 0 && x < RESOLUTION_X && y >= 0 && y < RESOLUTION_Y) {
+						renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
+					}
 				}
 			}
 		}
@@ -158,7 +175,9 @@ void Triangle::Draw(int* renderBuffer)
 					u += ustep;
 					v += vstep;
 					w += wstep;
-					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
+					if (x >= 0 && x < RESOLUTION_X && y >= 0 && y < RESOLUTION_Y) {
+						renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
+					}
 				}
 			}
 		}

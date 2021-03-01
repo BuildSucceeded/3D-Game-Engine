@@ -6,6 +6,7 @@
 #include "Point3D.h"
 #include "EngineBase.h"
 #include "GameObjectBase.h"
+#include "Camera.h"
 
 class EngineBase
 {
@@ -42,6 +43,8 @@ public:
 protected:
 
 	Point3D mousePosition;
+
+	Camera* camera;
 
 private:
 

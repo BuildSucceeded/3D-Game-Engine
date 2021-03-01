@@ -15,6 +15,8 @@ double EngineBase::Z0 = (RESOLUTION_X / 2.0) / tan((FIELD_OF_VIEW / 2.0) * 3.141
 EngineBase::EngineBase() : m_pDirect2dFactory(NULL), m_pRenderTarget(NULL)
 {
 	srand(time(NULL));
+
+	camera = new Camera();
 }
 
 EngineBase::~EngineBase()
@@ -47,10 +49,12 @@ void EngineBase::MousePosition(int x, int y)
 
 void EngineBase::KeyUp(WPARAM wParam)
 {
+	camera->HandleKeyUp(wParam);
 }
 
 void EngineBase::KeyDown(WPARAM wParam)
 {
+	camera->HandleKeyDown(wParam);
 }
 
 void EngineBase::MouseButtonUp(bool left, bool right)
@@ -85,6 +89,8 @@ void EngineBase::Logic(double elapsedTime)
 	{
 		objectList[i]->Logic(elapsedTime);
 	}
+
+	camera->Logic(elapsedTime);
 }
 
 HRESULT EngineBase::Draw()
@@ -104,6 +110,7 @@ HRESULT EngineBase::Draw()
 	for (int i = 0; i < objectList.size(); i++) {
 		for (int j = 0; j < objectList[i]->triangles.size(); j++) {
 			objectList[i]->triangles[j]->CalculateWorldPoints(objectList[i]->GetPosition(), objectList[i]->GetRotation());
+			objectList[i]->triangles[j]->CalculateCameraView(camera);
 			allTriangles.push_back(objectList[i]->triangles[j]);
 		}
 	}
