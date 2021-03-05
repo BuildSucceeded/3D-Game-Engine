@@ -33,7 +33,7 @@ public:
 	ID2D1Bitmap* LoadImage(LPCWSTR imageFile);
 	IWICBitmap* LoadImageInWIC(LPCWSTR imageFile);
 
-	double GetZ0();
+	static double GetZ0();
 
 	static Point3D Translate(Point3D original, Point3D translation);
 	static Point3D Rotate(Point3D original, Point3D translation);

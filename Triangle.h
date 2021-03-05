@@ -18,6 +18,11 @@ public:
 	static bool SortOrder(Triangle* triangle1, Triangle* triangle2);
 
 	double GetNormalZ();
+	Point3D* GetCameraPoints();
+	Point3D* GetDrawPoints();
+
+	std::list<Triangle*> GetZClippedTriangles();
+	std::list<Triangle*> GetClippedTriangles();
 
 private:
 

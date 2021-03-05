@@ -111,7 +111,12 @@ HRESULT EngineBase::Draw()
 		for (int j = 0; j < objectList[i]->triangles.size(); j++) {
 			objectList[i]->triangles[j]->CalculateWorldPoints(objectList[i]->GetPosition(), objectList[i]->GetRotation());
 			objectList[i]->triangles[j]->CalculateCameraView(camera);
-			allTriangles.push_back(objectList[i]->triangles[j]);
+			
+			std::list<Triangle*> clippedTriangles = objectList[i]->triangles[j]->GetZClippedTriangles();
+			for (Triangle* clippedTriangle : clippedTriangles)
+			{
+				allTriangles.push_back(clippedTriangle);
+			}
 		}
 	}
 
@@ -119,10 +124,19 @@ HRESULT EngineBase::Draw()
 	std::sort(allTriangles.begin(), allTriangles.end(), Triangle::SortOrder);
 
 	// Draw triangles in correct order
-	for (int i = 0; i < allTriangles.size(); i++) {
+	for (int i = 0; i < allTriangles.size(); i++)
+	{
 		allTriangles[i]->CalculateDrawPoints();
 		if (allTriangles[i]->GetNormalZ() < 0)
-			allTriangles[i]->Draw(renderBuffer);
+		{
+			std::list<Triangle*> clippedTriangles = allTriangles[i]->GetClippedTriangles();
+			for (Triangle* clippedTriangle : clippedTriangles)
+			{
+				clippedTriangle->Draw(renderBuffer);
+				delete clippedTriangle;
+			}
+		}
+		delete allTriangles[i];
 	}
 
 	pBitmap->CopyFromMemory(nullptr, renderBuffer, RESOLUTION_X * 4);
