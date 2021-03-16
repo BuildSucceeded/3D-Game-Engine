@@ -7,6 +7,7 @@
 #include "EngineBase.h"
 #include "GameObjectBase.h"
 #include "Camera.h"
+#include "Light.h"
 
 class EngineBase
 {
@@ -26,6 +27,9 @@ public:
 
 	void AddGameObject(GameObjectBase* gameObj);
 	void RemoveGameObject(GameObjectBase* gameObj);
+
+	void AddLight(Light* light);
+	void RemoveLight(Light* light);
 
 	virtual void Logic(double elapsedTime);
 	HRESULT Draw();
@@ -54,6 +58,8 @@ private:
 	ID2D1HwndRenderTarget* m_pRenderTarget;
 
 	std::vector<GameObjectBase*> objectList;
+
+	std::vector<Light*> lights;
 
 	ID2D1Bitmap* pBitmap;
 	

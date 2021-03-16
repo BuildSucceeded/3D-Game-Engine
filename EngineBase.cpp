@@ -83,6 +83,23 @@ void EngineBase::RemoveGameObject(GameObjectBase* gameObj)
 	}
 }
 
+void EngineBase::AddLight(Light* light)
+{
+	lights.push_back(light);
+}
+
+void EngineBase::RemoveLight(Light* light)
+{
+	for (int i = 0; i < lights.size(); i++)
+	{
+		if (lights[i] == light)
+		{
+			lights.erase(lights.begin() + i);
+			return;
+		}
+	}
+}
+
 void EngineBase::Logic(double elapsedTime)
 {
     for (int i = 0; i < objectList.size(); i++)
@@ -110,6 +127,13 @@ HRESULT EngineBase::Draw()
 	for (int i = 0; i < objectList.size(); i++) {
 		for (int j = 0; j < objectList[i]->triangles.size(); j++) {
 			objectList[i]->triangles[j]->CalculateWorldPoints(objectList[i]->GetPosition(), objectList[i]->GetRotation());
+
+			// Apply lights
+			for (int k = 0; k < lights.size(); k++)
+			{
+				objectList[i]->triangles[j]->ApplyLight(lights[k]);
+			}
+
 			objectList[i]->triangles[j]->CalculateCameraView(camera);
 			
 			std::list<Triangle*> clippedTriangles = objectList[i]->triangles[j]->GetZClippedTriangles();

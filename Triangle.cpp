@@ -6,7 +6,7 @@
 #include "Camera.h"
 #include "EngineBase.h"
 
-Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, Texture* t)
+Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, Texture* t, ColorUnion light)
 {
 	points[0] = p0;
 	points[1] = p1;
@@ -14,11 +14,11 @@ Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, Texture* t)
 	cameraPoints[0] = p0;
 	cameraPoints[1] = p1;
 	cameraPoints[2] = p2;
-	drawPoints[2] = p2;
 	drawPoints[0] = p0;
 	drawPoints[1] = p1;
 	drawPoints[2] = p2;
 	texture = t;
+	lightAmount = light;
 }
 
 void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
@@ -30,6 +30,29 @@ void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
 	// Translate
 	for (int i = 0; i < 3; i++)
 		worldPoints[i] = EngineBase::Translate(worldPoints[i], position);
+
+	// Reset light
+	lightAmount = ColorUnion::Create(0);
+}
+
+void Triangle::ApplyLight(Light* light)
+{
+	ColorUnion lightToAdd = ColorUnion::Create(255, 255, 255, 255);
+	lightToAdd.colorItems.red -= lightAmount.colorItems.red;
+	lightToAdd.colorItems.green -= lightAmount.colorItems.green;
+	lightToAdd.colorItems.blue -= lightAmount.colorItems.blue;
+	lightToAdd.colorItems.alpha -= lightAmount.colorItems.alpha;
+
+	double percentToApply = 1;
+	if (light->GetLightType() == ambiental) {
+		percentToApply = 1;
+	}
+	// TODO : more light types
+
+	lightAmount.colorItems.red += (unsigned char)(lightToAdd.colorItems.red * percentToApply * (light->GetColor().colorItems.red / 255.0));
+	lightAmount.colorItems.green += (unsigned char)(lightToAdd.colorItems.green * percentToApply * (light->GetColor().colorItems.green / 255.0));
+	lightAmount.colorItems.blue += (unsigned char)(lightToAdd.colorItems.blue * percentToApply * (light->GetColor().colorItems.blue / 255.0));
+	lightAmount.colorItems.alpha += (unsigned char)(lightToAdd.colorItems.alpha * percentToApply * (light->GetColor().colorItems.alpha / 255.0));
 }
 
 void Triangle::CalculateCameraView(Camera* camera)
@@ -135,7 +158,12 @@ void Triangle::Draw(int* renderBuffer)
 					u += ustep;
 					v += vstep;
 					w += wstep;
-					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
+					ColorUnion color = ColorUnion::Create(texture->GetValue(u / w, v / w));
+					color.colorItems.red = (unsigned char)(color.colorItems.red * lightAmount.colorItems.red / 255.0);
+					color.colorItems.green = (unsigned char)(color.colorItems.green * lightAmount.colorItems.green / 255.0);
+					color.colorItems.blue = (unsigned char)(color.colorItems.blue * lightAmount.colorItems.blue / 255.0);
+					color.colorItems.alpha = (unsigned char)(color.colorItems.alpha * lightAmount.colorItems.alpha / 255.0);
+					renderBuffer[RESOLUTION_X * y + x] = color.color;
 				}
 			}
 		}
@@ -182,7 +210,12 @@ void Triangle::Draw(int* renderBuffer)
 					u += ustep;
 					v += vstep;
 					w += wstep;
-					renderBuffer[RESOLUTION_X * y + x] = texture->GetValue(u / w, v / w);
+					ColorUnion color = ColorUnion::Create(texture->GetValue(u / w, v / w));
+					color.colorItems.red = (unsigned char)(color.colorItems.red * lightAmount.colorItems.red / 255.0);
+					color.colorItems.green = (unsigned char)(color.colorItems.green * lightAmount.colorItems.green / 255.0);
+					color.colorItems.blue = (unsigned char)(color.colorItems.blue * lightAmount.colorItems.blue / 255.0);
+					color.colorItems.alpha = (unsigned char)(color.colorItems.alpha * lightAmount.colorItems.alpha / 255.0);
+					renderBuffer[RESOLUTION_X * y + x] = color.color;
 				}
 			}
 		}
@@ -213,7 +246,7 @@ Point3D* Triangle::GetDrawPoints()
 std::list<Triangle*> Triangle::GetZClippedTriangles()
 {
 	std::list<Triangle*> toReturn;
-	toReturn.push_back(new Triangle(cameraPoints[0], cameraPoints[1], cameraPoints[2], texture));
+	toReturn.push_back(new Triangle(cameraPoints[0], cameraPoints[1], cameraPoints[2], texture, lightAmount));
 
 	int noTriangles;
 	std::vector<Point3D> insidePoints;
@@ -241,7 +274,7 @@ std::list<Triangle*> Triangle::GetZClippedTriangles()
 		delete currentTriangle;
 		if (outsidePoints.size() == 0)
 		{
-			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture));
+			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 1)
 		{
@@ -262,14 +295,14 @@ std::list<Triangle*> Triangle::GetZClippedTriangles()
 			extraPoint2.w = outsidePoints[0].w + (0 - outsidePoints[0].z) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].z - outsidePoints[0].z);
 
 			if (pointsAreOutside[0]) {
-				toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture));
-				toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture));
+				toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture, lightAmount));
+				toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture, lightAmount));
 			} else if (pointsAreOutside[1]) {
-				toReturn.push_back(new Triangle(extraPoint1, insidePoints[1], insidePoints[0], texture));
-				toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[0], texture));
+				toReturn.push_back(new Triangle(extraPoint1, insidePoints[1], insidePoints[0], texture, lightAmount));
+				toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[0], texture, lightAmount));
 			} else if (pointsAreOutside[2]) {
-				toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture));
-				toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture));
+				toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture, lightAmount));
+				toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture, lightAmount));
 			}
 		}
 		else if (outsidePoints.size() == 2)
@@ -291,11 +324,11 @@ std::list<Triangle*> Triangle::GetZClippedTriangles()
 			extraPoint2.w = outsidePoints[1].w + (0 - outsidePoints[1].z) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].z - outsidePoints[1].z);
 
 			if (!pointsAreOutside[0]) {
-				toReturn.push_back(new Triangle(extraPoint2, insidePoints[0], extraPoint1, texture));
+				toReturn.push_back(new Triangle(extraPoint2, insidePoints[0], extraPoint1, texture, lightAmount));
 			} else if (!pointsAreOutside[1]) {
-				toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], extraPoint2, texture));
+				toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], extraPoint2, texture, lightAmount));
 			} else if (!pointsAreOutside[2]) {
-				toReturn.push_back(new Triangle(extraPoint2, insidePoints[0], extraPoint1, texture));
+				toReturn.push_back(new Triangle(extraPoint2, insidePoints[0], extraPoint1, texture, lightAmount));
 			}
 			
 		}
@@ -307,7 +340,7 @@ std::list<Triangle*> Triangle::GetZClippedTriangles()
 std::list<Triangle*> Triangle::GetClippedTriangles()
 {
 	std::list<Triangle*> toReturn;
-	toReturn.push_back(new Triangle(drawPoints[0], drawPoints[1], drawPoints[2], texture));
+	toReturn.push_back(new Triangle(drawPoints[0], drawPoints[1], drawPoints[2], texture, lightAmount));
 
 	int noTriangles;
 	std::vector<Point3D> insidePoints;
@@ -332,7 +365,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 		delete currentTriangle;
 		if (outsidePoints.size() == 0)
 		{
-			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture));
+			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 1)
 		{
@@ -352,9 +385,9 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[0].v + (0 - outsidePoints[0].x) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].x - outsidePoints[0].x);
 			extraPoint2.w = outsidePoints[0].w + (0 - outsidePoints[0].x) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].x - outsidePoints[0].x);
 
-			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture, lightAmount));
 
-			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 2)
 		{
@@ -374,7 +407,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[1].v + (0 - outsidePoints[1].x) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].x - outsidePoints[1].x);
 			extraPoint2.w = outsidePoints[1].w + (0 - outsidePoints[1].x) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].x - outsidePoints[1].x);
 
-			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture));
+			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture, lightAmount));
 		}
 	}
 
@@ -397,7 +430,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 		delete currentTriangle;
 		if (outsidePoints.size() == 0)
 		{
-			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture));
+			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 1)
 		{
@@ -417,9 +450,9 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[0].v + (RESOLUTION_X - 1 - outsidePoints[0].x) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].x - outsidePoints[0].x);
 			extraPoint2.w = outsidePoints[0].w + (RESOLUTION_X - 1 - outsidePoints[0].x) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].x - outsidePoints[0].x);
 
-			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture, lightAmount));
 
-			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 2)
 		{
@@ -439,7 +472,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[1].v + (RESOLUTION_X - 1 - outsidePoints[1].x) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].x - outsidePoints[1].x);
 			extraPoint2.w = outsidePoints[1].w + (RESOLUTION_X - 1 - outsidePoints[1].x) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].x - outsidePoints[1].x);
 
-			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture));
+			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture, lightAmount));
 		}
 	}
 
@@ -462,7 +495,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 		delete currentTriangle;
 		if (outsidePoints.size() == 0)
 		{
-			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture));
+			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 1)
 		{
@@ -482,9 +515,9 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[0].v - outsidePoints[0].y * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].y - outsidePoints[0].y);
 			extraPoint2.w = outsidePoints[0].w - outsidePoints[0].y * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].y - outsidePoints[0].y);
 
-			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture, lightAmount));
 
-			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 2)
 		{
@@ -504,7 +537,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[1].v - outsidePoints[1].y * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].y - outsidePoints[1].y);
 			extraPoint2.w = outsidePoints[1].w - outsidePoints[1].y * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].y - outsidePoints[1].y);
 
-			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture));
+			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture, lightAmount));
 		}
 	}
 
@@ -527,7 +560,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 		delete currentTriangle;
 		if (outsidePoints.size() == 0)
 		{
-			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture));
+			toReturn.push_back(new Triangle(insidePoints[0], insidePoints[1], insidePoints[2], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 1)
 		{
@@ -547,9 +580,9 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[0].v + (RESOLUTION_Y - 1 - outsidePoints[0].y) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].y - outsidePoints[0].y);
 			extraPoint2.w = outsidePoints[0].w + (RESOLUTION_Y - 1 - outsidePoints[0].y) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].y - outsidePoints[0].y);
 
-			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint1, insidePoints[0], insidePoints[1], texture, lightAmount));
 
-			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture));
+			toReturn.push_back(new Triangle(extraPoint2, extraPoint1, insidePoints[1], texture, lightAmount));
 		}
 		else if (outsidePoints.size() == 2)
 		{
@@ -569,7 +602,7 @@ std::list<Triangle*> Triangle::GetClippedTriangles()
 			extraPoint2.v = outsidePoints[1].v + (RESOLUTION_Y - 1 - outsidePoints[1].y) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].y - outsidePoints[1].y);
 			extraPoint2.w = outsidePoints[1].w + (RESOLUTION_Y - 1 - outsidePoints[1].y) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].y - outsidePoints[1].y);
 
-			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture));
+			toReturn.push_back(new Triangle(extraPoint1, extraPoint2, insidePoints[0], texture, lightAmount));
 		}
 	}
 

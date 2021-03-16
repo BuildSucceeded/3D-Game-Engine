@@ -6,6 +6,9 @@
 
 Engine::Engine()
 {
+    Light* ambientLight = new Light(ambiental, Point3D::Create(0, 0, 0), Point3D::Create(0, 0, 0), ColorUnion::Create(63, 63, 63, 255));
+    AddLight(ambientLight);
+
     Cube* cube = new Cube();
     AddGameObject(cube);
 }
