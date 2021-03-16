@@ -39,6 +39,8 @@ public:
 
 	static double GetZ0();
 
+	static Point3D CalculateNormal(Point3D p1, Point3D p2, Point3D p3);
+	static double CalculateDotProduct(Point3D p1, Point3D p2);
 	static Point3D Translate(Point3D original, Point3D translation);
 	static Point3D Rotate(Point3D original, Point3D translation);
 	static Point3D ApplyPerspective(Point3D original);

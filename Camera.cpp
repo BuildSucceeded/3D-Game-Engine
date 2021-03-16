@@ -7,8 +7,10 @@ Camera::Camera()
 
     leftPressed = false;
     rightPressed = false;
-    upPressed = false;
-    downPressed = false;
+    aPressed = false;
+    wPressed = false;
+    sPressed = false;
+    dPressed = false;
 }
 
 Camera::Camera(Point3D position, Point3D rotation)
@@ -18,8 +20,10 @@ Camera::Camera(Point3D position, Point3D rotation)
 
     leftPressed = false;
     rightPressed = false;
-    upPressed = false;
-    downPressed = false;
+    aPressed = false;
+    wPressed = false;
+    sPressed = false;
+    dPressed = false;
 }
 
 void Camera::HandleKeyDown(WPARAM wParam)
@@ -28,10 +32,14 @@ void Camera::HandleKeyDown(WPARAM wParam)
         leftPressed = true;
     if (wParam == VK_RIGHT)
         rightPressed = true;
-    if (wParam == VK_UP)
-        upPressed = true;
-    if (wParam == VK_DOWN)
-        downPressed = true;
+    if (wParam == 0x41) // A Key
+        aPressed = true;
+    if (wParam == 0x57) // W key
+        wPressed = true;
+    if (wParam == 0x53) // S Key
+        sPressed = true;
+    if (wParam == 0x44) // D key
+        dPressed = true;
 }
 
 void Camera::HandleKeyUp(WPARAM wParam)
@@ -40,23 +48,37 @@ void Camera::HandleKeyUp(WPARAM wParam)
         leftPressed = false;
     if (wParam == VK_RIGHT)
         rightPressed = false;
-    if (wParam == VK_UP)
-        upPressed = false;
-    if (wParam == VK_DOWN)
-        downPressed = false;
+    if (wParam == 0x41) // A Key
+        aPressed = false;
+    if (wParam == 0x57) // W key
+        wPressed = false;
+    if (wParam == 0x53) // S Key
+        sPressed = false;
+    if (wParam == 0x44) // D key
+        dPressed = false;
 }
 
 void Camera::Logic(double elapsedTime)
 {
-    if (upPressed)
+    if (wPressed)
     {
-        this->position.z += 500 * cos(this->rotation.y) * elapsedTime;
-        this->position.x += 500 * sin(this->rotation.y) * elapsedTime;
+        this->position.z += 10000 * cos(this->rotation.y) * elapsedTime;
+        this->position.x += 10000 * sin(this->rotation.y) * elapsedTime;
     }
-    if (downPressed)
+    if (sPressed)
     {
-        this->position.z -= 500 * cos(this->rotation.y) * elapsedTime;
-        this->position.x -= 500 * sin(this->rotation.y) * elapsedTime;
+        this->position.z -= 10000 * cos(this->rotation.y) * elapsedTime;
+        this->position.x -= 10000 * sin(this->rotation.y) * elapsedTime;
+    }
+    if (aPressed)
+    {
+        this->position.z += 10000 * sin(this->rotation.y) * elapsedTime;
+        this->position.x -= 10000 * cos(this->rotation.y) * elapsedTime;
+    }
+    if (dPressed)
+    {
+        this->position.z -= 10000 * sin(this->rotation.y) * elapsedTime;
+        this->position.x += 10000 * cos(this->rotation.y) * elapsedTime;
     }
     if (leftPressed)
         this->rotation.y -= elapsedTime;

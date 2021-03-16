@@ -22,8 +22,10 @@ private:
 	Point3D position;
 	Point3D rotation;
 
-	bool upPressed;
-	bool downPressed;
 	bool leftPressed;
 	bool rightPressed;
+	bool wPressed;
+	bool sPressed;
+	bool aPressed;
+	bool dPressed;
 };

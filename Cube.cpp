@@ -8,7 +8,7 @@ Cube::Cube()
 	IWICBitmap* textureBMP = engine->LoadImageInWIC(L"crate.png");
 	Texture* texture = new Texture(textureBMP);
 
-	position = Point3D::Create(0, 0, 4000);
+	position = Point3D::Create(0, 0, 6000);
 	rotation = Point3D::Create(0, 0, 0);
 
 	// front
@@ -34,5 +34,5 @@ Cube::Cube()
 
 void Cube::Logic(double elapsedTime)
 {
-	//rotation.y += 1 * elapsedTime;
+	rotation.y += 1 * elapsedTime;
 }

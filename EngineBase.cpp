@@ -289,6 +289,38 @@ double EngineBase::GetZ0()
 	return EngineBase::Z0;
 }
 
+Point3D EngineBase::CalculateNormal(Point3D p1, Point3D p2, Point3D p3)
+{
+	// First normalize
+	Point3D v1;
+	v1.x = (p2.x - p1.x);
+	v1.y = (p2.y - p1.y);
+	v1.z = (p2.z - p1.z);
+	double v1l = sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+	v1.x = v1.x / v1l;
+	v1.y = v1.y / v1l;
+	v1.z = v1.z / v1l;
+	Point3D v2;
+	v2.x = (p3.x - p1.x);
+	v2.y = (p3.y - p1.y);
+	v2.z = (p3.z - p1.z);
+	double v2l = sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
+	v2.x = v2.x / v2l;
+	v2.y = v2.y / v2l;
+	v2.z = v2.z / v2l;
+	// Calculate normal
+	Point3D toReturn;
+	toReturn.x = v1.y * v2.z - v1.z * v2.y;
+	toReturn.y = v1.z * v2.x - v1.x * v2.z;
+	toReturn.z = v1.x * v2.y - v1.y * v2.x;
+	return toReturn;
+}
+
+double EngineBase::CalculateDotProduct(Point3D p1, Point3D p2)
+{
+	return p1.x * p2.x + p1.y * p2.y + p1.z * p2.z;
+}
+
 Point3D EngineBase::Translate(Point3D original, Point3D translation)
 {
 	Point3D toReturn;

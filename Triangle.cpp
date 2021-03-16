@@ -33,6 +33,9 @@ void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
 
 	// Reset light
 	lightAmount = ColorUnion::Create(0);
+
+	// Calculate normal
+	normal = EngineBase::CalculateNormal(worldPoints[0], worldPoints[1], worldPoints[2]);
 }
 
 void Triangle::ApplyLight(Light* light)
@@ -46,6 +49,11 @@ void Triangle::ApplyLight(Light* light)
 	double percentToApply = 1;
 	if (light->GetLightType() == ambiental) {
 		percentToApply = 1;
+	}
+	else if (light->GetLightType() == directional) {
+		percentToApply = -EngineBase::CalculateDotProduct(normal, light->GetDirection());
+		if (percentToApply < 0)
+			percentToApply = 0;
 	}
 	// TODO : more light types
 

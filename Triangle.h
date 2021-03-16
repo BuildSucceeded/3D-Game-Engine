@@ -34,6 +34,7 @@ private:
 
 	Point3D points[3];
 	Point3D worldPoints[3];
+	Point3D normal;
 	Point3D cameraPoints[3];
 	Point3D drawPoints[3];
 	double averageZ;
