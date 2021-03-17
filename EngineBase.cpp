@@ -163,6 +163,10 @@ HRESULT EngineBase::Draw()
 		delete allTriangles[i];
 	}
 
+	if (ANTIALIASING) {
+		AntiAliasing();
+	}
+
 	pBitmap->CopyFromMemory(nullptr, renderBuffer, RESOLUTION_X * 4);
 
 	m_pRenderTarget->DrawBitmap(pBitmap, D2D1::RectF(0, 0, RESOLUTION_X, RESOLUTION_Y));
@@ -376,4 +380,22 @@ Point3D EngineBase::CenterScreen(Point3D original)
 	toReturn.v = original.v;
 	toReturn.w = original.w;
 	return toReturn;
+}
+
+void EngineBase::AntiAliasing() {
+
+	for (int y = 1; y < RESOLUTION_Y - 1; y++) {
+		for (int x = 1; x < RESOLUTION_X - 1; x++) {
+			ColorUnion center = ColorUnion::Create(renderBuffer[y * RESOLUTION_X + x]);
+			ColorUnion right = ColorUnion::Create(renderBuffer[y * RESOLUTION_X + x + 1]);
+			ColorUnion down = ColorUnion::Create(renderBuffer[(y + 1) * RESOLUTION_X + x]);
+			ColorUnion downright = ColorUnion::Create(renderBuffer[(y + 1) * RESOLUTION_X + x + 1]);
+			center.colorItems.red = (unsigned char)(((int)center.colorItems.red + right.colorItems.red + down.colorItems.red + downright.colorItems.red) / 4.0);
+			center.colorItems.green = (unsigned char)(((int)center.colorItems.green + right.colorItems.green + down.colorItems.green + downright.colorItems.green) / 4.0);
+			center.colorItems.blue = (unsigned char)(((int)center.colorItems.blue + right.colorItems.blue + down.colorItems.blue + downright.colorItems.blue) / 4.0);
+			center.colorItems.alpha = (unsigned char)(((int)center.colorItems.alpha + right.colorItems.alpha + down.colorItems.alpha + downright.colorItems.alpha) / 4.0);
+			renderBuffer[y * RESOLUTION_X + x] = center.color;
+		}
+	}
+
 }

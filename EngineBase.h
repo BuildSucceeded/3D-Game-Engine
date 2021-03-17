@@ -54,6 +54,8 @@ protected:
 
 private:
 
+	void AntiAliasing();
+
 	static double Z0;
 
 	ID2D1Factory* m_pDirect2dFactory;
