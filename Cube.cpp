@@ -3,12 +3,12 @@
 #include "Cube.h"
 #include "Engine.h"
 
-Cube::Cube()
+Cube::Cube(Point3D pos)
 {
 	IWICBitmap* textureBMP = engine->LoadImageInWIC(L"crate.png");
 	Texture* texture = new Texture(textureBMP);
 
-	position = Point3D::Create(0, 0, 6000);
+	position = pos;
 	rotation = Point3D::Create(0, 0, 0);
 
 	// front

@@ -19,6 +19,7 @@ Triangle::Triangle(Point3D p0, Point3D p1, Point3D p2, Texture* t, ColorUnion li
 	drawPoints[2] = p2;
 	texture = t;
 	lightAmount = light;
+	averageZ = (cameraPoints[0].z + cameraPoints[1].z + cameraPoints[2].z) / 3.0;
 }
 
 void Triangle::CalculateWorldPoints(Point3D position, Point3D rotation)
@@ -47,11 +48,32 @@ void Triangle::ApplyLight(Light* light)
 	lightToAdd.colorItems.alpha -= lightAmount.colorItems.alpha;
 
 	double percentToApply = 1;
-	if (light->GetLightType() == ambiental) {
+	if (light->GetLightType() == ambiental)
+	{
 		percentToApply = 1;
 	}
-	else if (light->GetLightType() == directional) {
+	else if (light->GetLightType() == directional)
+	{
 		percentToApply = -EngineBase::CalculateDotProduct(normal, light->GetDirection());
+		if (percentToApply < 0)
+			percentToApply = 0;
+	}
+	else if (light->GetLightType() == fixed)
+	{
+		Point3D center;
+		center.x = (worldPoints[0].x + worldPoints[1].x + worldPoints[2].x) / 3;
+		center.y = (worldPoints[0].y + worldPoints[1].y + worldPoints[2].y) / 3;
+		center.z = (worldPoints[0].z + worldPoints[1].z + worldPoints[2].z) / 3;
+		Point3D direction;
+		direction.x = center.x - light->GetPosition().x;
+		direction.y = center.y - light->GetPosition().y;
+		direction.z = center.z - light->GetPosition().z;
+		// Normalize direction
+		double dirl = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+		direction.x = direction.x / dirl;
+		direction.y = direction.y / dirl;
+		direction.z = direction.z / dirl;
+		percentToApply = -EngineBase::CalculateDotProduct(normal, direction);
 		if (percentToApply < 0)
 			percentToApply = 0;
 	}

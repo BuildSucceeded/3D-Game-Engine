@@ -9,11 +9,16 @@ Engine::Engine()
     Light* ambientLight = new Light(ambiental, Point3D::Create(0, 0, 0), Point3D::Create(0, 0, 0), ColorUnion::Create(31, 31, 31, 255));
     AddLight(ambientLight);
 
-    Light* dirLight = new Light(directional, Point3D::Create(0, 0, 0), Point3D::Create(0, 0, 1), ColorUnion::Create(255, 255, 255, 255));
-    AddLight(dirLight);
+    //Light* dirLight = new Light(directional, Point3D::Create(0, 0, 0), Point3D::Create(1, 0, 0), ColorUnion::Create(255, 255, 255, 255));
+    //AddLight(dirLight);
 
-    Cube* cube = new Cube();
-    AddGameObject(cube);
+    Light* posLight = new Light(fixed, Point3D::Create(0, 0, 8000), Point3D::Create(0, 0, 0), ColorUnion::Create(255, 255, 255, 255));
+    AddLight(posLight);
+
+    Cube* cube1 = new Cube(Point3D::Create(2000, 0, 8000));
+    AddGameObject(cube1);
+    Cube* cube2 = new Cube(Point3D::Create(-2000, 0, 8000));
+    AddGameObject(cube2);
 }
 
 Engine::~Engine()
