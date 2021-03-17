@@ -6,6 +6,16 @@ Light::Light(LightType lightType, Point3D position, Point3D direction, ColorUnio
 	this->position = position;
 	this->direction = direction;
 	this->color = color;
+	this->length = 0;
+}
+
+Light::Light(LightType lightType, Point3D position, Point3D direction, ColorUnion color, double length)
+{
+	this->lightType = lightType;
+	this->position = position;
+	this->direction = direction;
+	this->color = color;
+	this->length = length;
 }
 
 LightType Light::GetLightType()
@@ -26,4 +36,9 @@ Point3D Light::GetDirection()
 ColorUnion Light::GetColor()
 {
 	return color;
+}
+
+double Light::GetLength()
+{
+	return length;
 }

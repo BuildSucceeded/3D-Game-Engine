@@ -47,7 +47,7 @@ void Triangle::ApplyLight(Light* light)
 	lightToAdd.colorItems.blue -= lightAmount.colorItems.blue;
 	lightToAdd.colorItems.alpha -= lightAmount.colorItems.alpha;
 
-	double percentToApply = 1;
+	double percentToApply = 0;
 	if (light->GetLightType() == ambiental)
 	{
 		percentToApply = 1;
@@ -73,9 +73,13 @@ void Triangle::ApplyLight(Light* light)
 		direction.x = direction.x / dirl;
 		direction.y = direction.y / dirl;
 		direction.z = direction.z / dirl;
-		percentToApply = -EngineBase::CalculateDotProduct(normal, direction);
-		if (percentToApply < 0)
-			percentToApply = 0;
+		// Use the dirl to dim the light based on distance
+		if (dirl < light->GetLength()) {
+			double dim = 1 - dirl / light->GetLength();
+			percentToApply = -EngineBase::CalculateDotProduct(normal, direction) * dim;
+			if (percentToApply < 0)
+				percentToApply = 0;
+		}
 	}
 	// TODO : more light types
 
