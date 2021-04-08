@@ -69,5 +69,6 @@ private:
 	
 
 	int renderBuffer[RESOLUTION_X * RESOLUTION_Y];
+	double zBuffer[RESOLUTION_X * RESOLUTION_Y];
 };
 

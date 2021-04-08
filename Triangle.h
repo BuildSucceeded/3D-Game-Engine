@@ -15,7 +15,7 @@ public:
 	void ApplyLight(Light* light);
 	void CalculateCameraView(Camera* camera);
 	void CalculateDrawPoints();
-	void Draw(int *renderBuffer);
+	void Draw(int *renderBuffer, double *zBuffer);
 
 	static bool SortOrder(Triangle* triangle1, Triangle* triangle2);
 

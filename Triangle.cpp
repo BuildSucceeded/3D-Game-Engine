@@ -121,7 +121,7 @@ void Triangle::CalculateDrawPoints()
 	normalZ = (drawPoints[1].x - drawPoints[0].x) * (drawPoints[2].y - drawPoints[0].y) - (drawPoints[1].y - drawPoints[0].y) * (drawPoints[2].x - drawPoints[0].x);
 }
 
-void Triangle::Draw(int* renderBuffer)
+void Triangle::Draw(int* renderBuffer, double* zBuffer)
 {
 	
 	Point3D aux;
@@ -167,6 +167,9 @@ void Triangle::Draw(int* renderBuffer)
 			double ve = drawPoints[0].v + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
 			double we = drawPoints[0].w + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].w - drawPoints[0].w);
 
+			double zs = drawPoints[0].z + ((double)y - p0y) / (p1y - p0y) * (drawPoints[1].z - drawPoints[0].z);
+			double ze = drawPoints[0].z + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].z - drawPoints[0].z);
+
 			if (x1 > x2) {
 				int aux = x1;
 				x1 = x2;
@@ -180,6 +183,9 @@ void Triangle::Draw(int* renderBuffer)
 				aux2 = ws;
 				ws = we;
 				we = aux2;
+				aux2 = zs;
+				zs = ze;
+				ze = aux2;
 			}
 			if (x2 > x1) {
 				double u = us * texWidth;
@@ -188,16 +194,22 @@ void Triangle::Draw(int* renderBuffer)
 				double vstep = (ve - vs) / (x2 - x1) * texHeight;
 				double w = ws;
 				double wstep = (we - ws) / (x2 - x1);
+				double z = zs;
+				double zstep = (ze - zs) / (x2 - x1);
 				for (int x = x1; x <= x2; x++) {
 					u += ustep;
 					v += vstep;
 					w += wstep;
-					ColorUnion color = ColorUnion::Create(texture->GetValue(u / w, v / w));
-					color.colorItems.red = (unsigned char)(color.colorItems.red * lightAmount.colorItems.red / 255.0);
-					color.colorItems.green = (unsigned char)(color.colorItems.green * lightAmount.colorItems.green / 255.0);
-					color.colorItems.blue = (unsigned char)(color.colorItems.blue * lightAmount.colorItems.blue / 255.0);
-					color.colorItems.alpha = (unsigned char)(color.colorItems.alpha * lightAmount.colorItems.alpha / 255.0);
-					renderBuffer[RESOLUTION_X * y + x] = color.color;
+					z += zstep;
+					if (zBuffer[RESOLUTION_X * y + x] == 0 || zBuffer[RESOLUTION_X * y + x] > z) {
+						ColorUnion color = ColorUnion::Create(texture->GetValue(u / w, v / w));
+						color.colorItems.red = (unsigned char)(color.colorItems.red * lightAmount.colorItems.red / 255.0);
+						color.colorItems.green = (unsigned char)(color.colorItems.green * lightAmount.colorItems.green / 255.0);
+						color.colorItems.blue = (unsigned char)(color.colorItems.blue * lightAmount.colorItems.blue / 255.0);
+						color.colorItems.alpha = (unsigned char)(color.colorItems.alpha * lightAmount.colorItems.alpha / 255.0);
+						renderBuffer[RESOLUTION_X * y + x] = color.color;
+						zBuffer[RESOLUTION_X * y + x] = z;
+					}
 				}
 			}
 		}
@@ -219,6 +231,9 @@ void Triangle::Draw(int* renderBuffer)
 			double ve = drawPoints[0].v + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].v - drawPoints[0].v);
 			double we = drawPoints[0].w + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].w - drawPoints[0].w);
 
+			double zs = drawPoints[1].z + ((double)y - p1y) / (p2y - p1y) * (drawPoints[2].z - drawPoints[1].z);
+			double ze = drawPoints[0].z + ((double)y - p0y) / (p2y - p0y) * (drawPoints[2].z - drawPoints[0].z);
+
 			if (x1 > x2) {
 				int aux = x1;
 				x1 = x2;
@@ -232,6 +247,9 @@ void Triangle::Draw(int* renderBuffer)
 				aux2 = ws;
 				ws = we;
 				we = aux2;
+				aux2 = zs;
+				zs = ze;
+				ze = aux2;
 			}
 			if (x2 > x1) {
 				double u = us * texWidth;
@@ -240,16 +258,22 @@ void Triangle::Draw(int* renderBuffer)
 				double vstep = (ve - vs) / (x2 - x1) * texHeight;
 				double w = ws;
 				double wstep = (we - ws) / (x2 - x1);
+				double z = zs;
+				double zstep = (ze - zs) / (x2 - x1);
 				for (int x = x1; x <= x2; x++) {
 					u += ustep;
 					v += vstep;
 					w += wstep;
-					ColorUnion color = ColorUnion::Create(texture->GetValue(u / w, v / w));
-					color.colorItems.red = (unsigned char)(color.colorItems.red * lightAmount.colorItems.red / 255.0);
-					color.colorItems.green = (unsigned char)(color.colorItems.green * lightAmount.colorItems.green / 255.0);
-					color.colorItems.blue = (unsigned char)(color.colorItems.blue * lightAmount.colorItems.blue / 255.0);
-					color.colorItems.alpha = (unsigned char)(color.colorItems.alpha * lightAmount.colorItems.alpha / 255.0);
-					renderBuffer[RESOLUTION_X * y + x] = color.color;
+					z += zstep;
+					if (zBuffer[RESOLUTION_X * y + x] == 0 || zBuffer[RESOLUTION_X * y + x] > z) {
+						ColorUnion color = ColorUnion::Create(texture->GetValue(u / w, v / w));
+						color.colorItems.red = (unsigned char)(color.colorItems.red * lightAmount.colorItems.red / 255.0);
+						color.colorItems.green = (unsigned char)(color.colorItems.green * lightAmount.colorItems.green / 255.0);
+						color.colorItems.blue = (unsigned char)(color.colorItems.blue * lightAmount.colorItems.blue / 255.0);
+						color.colorItems.alpha = (unsigned char)(color.colorItems.alpha * lightAmount.colorItems.alpha / 255.0);
+						renderBuffer[RESOLUTION_X * y + x] = color.color;
+						zBuffer[RESOLUTION_X * y + x] = z;
+					}
 				}
 			}
 		}

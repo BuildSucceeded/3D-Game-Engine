@@ -122,6 +122,9 @@ HRESULT EngineBase::Draw()
 	// Clear buffer vector
 	memset(renderBuffer, 0, RESOLUTION_X * RESOLUTION_Y * 4);
 
+	// Clear Z buffer
+	memset(zBuffer, 0, RESOLUTION_X * RESOLUTION_Y * sizeof(double));
+
 	// Get all triangles (translated into world based on object position)
 	std::vector<Triangle*> allTriangles;
 	for (int i = 0; i < objectList.size(); i++) {
@@ -145,7 +148,7 @@ HRESULT EngineBase::Draw()
 	}
 
 	// Sort the triangles by average Z
-	std::sort(allTriangles.begin(), allTriangles.end(), Triangle::SortOrder);
+	//std::sort(allTriangles.begin(), allTriangles.end(), Triangle::SortOrder);
 
 	// Draw triangles in correct order
 	for (int i = 0; i < allTriangles.size(); i++)
@@ -156,7 +159,7 @@ HRESULT EngineBase::Draw()
 			std::list<Triangle*> clippedTriangles = allTriangles[i]->GetClippedTriangles();
 			for (Triangle* clippedTriangle : clippedTriangles)
 			{
-				clippedTriangle->Draw(renderBuffer);
+				clippedTriangle->Draw(renderBuffer, zBuffer);
 				delete clippedTriangle;
 			}
 		}
